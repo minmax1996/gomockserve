@@ -1,0 +1,4 @@
+/api/some/route:
+  file: testdata/someresponse.json
+/api/some/route/soap:
+  file: testdata/someresponse.xml
