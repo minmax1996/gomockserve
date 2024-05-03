@@ -9,4 +9,4 @@ paste in `config.yaml` your api route and file for response
 /api/some/route/soap:
   file: testdata/someresponse.xml
 ```
-run `gomockserve` or `gomockserve --config=otherconfiglocation.yaml`
+run `gomockserve .` or `gomockserve . --c=otherconfiglocation.yaml`
