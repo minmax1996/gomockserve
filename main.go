@@ -23,7 +23,8 @@ var routesConfig map[string]Config
 var baseDir string
 
 type Config struct {
-	File string
+	File         string `yaml:"file"`
+	ResponseCode *int   `yaml:"response_code"`
 }
 
 func init() {
@@ -81,7 +82,11 @@ func singleFileHandler(route string) func(w http.ResponseWriter, r *http.Request
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
+		if routeConfig.ResponseCode != nil {
+			w.WriteHeader(*routeConfig.ResponseCode)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
 		_, _ = w.Write(data)
 	}
 }
