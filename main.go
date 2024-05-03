@@ -7,6 +7,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v2"
 )
@@ -55,30 +56,32 @@ func main() {
 	if len(os.Args) > 1 {
 		baseDir = os.Args[1]
 	}
-	mux := http.NewServeMux()
+	router := mux.NewRouter()
 	for route := range routesConfig {
-		mux.HandleFunc(route, singleFileHandler)
+		router.HandleFunc(route, singleFileHandler(route))
 	}
 	log.Printf("start application on %s port", *port)
-	err := http.ListenAndServe(*port, mux)
+	err := http.ListenAndServe(*port, router)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func singleFileHandler(w http.ResponseWriter, r *http.Request) {
-	routeConfig, ok := routesConfig[r.URL.Path]
-	if !ok {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-	data, err := os.ReadFile(path.Join(baseDir, routeConfig.File))
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
+func singleFileHandler(route string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		routeConfig, ok := routesConfig[route]
+		if !ok {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		data, err := os.ReadFile(path.Join(baseDir, routeConfig.File))
+		if err != nil {
+			log.Println(err)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
 
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write(data)
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(data)
+	}
 }
